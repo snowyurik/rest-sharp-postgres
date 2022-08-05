@@ -1,8 +1,8 @@
 # Changelog
 
 ## [2022-08-05]
- - CRUD for Books collection
- - Config
+ <!-- - CRUD for Books collection -->
+ - Config with support of parameter override with environment variables
 
 ## [2022-08-03]
 ### Added
