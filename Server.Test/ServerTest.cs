@@ -1,10 +1,15 @@
 using System;
 using Xunit;
 using Server.Model;
+using Server.Misc;
+using System.Linq;
+// using ContosoUniversity.Data;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Server.Test
 {
-    public class ServerTest
+    public class ServerTest : Common.Test
     {
         [Fact]
         public void testSelf() {
@@ -13,30 +18,40 @@ namespace Server.Test
 
         [Fact]
         public void TestBooksCRUDForDb() {
-            // using (var db = new Context()) {
-            //         // Create and save a new Blog
-            //         Console.Write("Enter a name for a new Blog: ");
-            //         var name = Console.ReadLine();
+            using (var db = new Context() ) {
+                db.Database.EnsureCreated();
+                db.Database.Migrate(); 
+                Log("Context created");
+                var countBefore = db.Books.Count();
+                Log( countBefore );
+                Book book = new Book { Title = "test book title 1" };
+                db.Books.Add( book );
+                db.SaveChanges();
+                Log("Book saved ");
+                Log( book );
+                var countAdded = db.Books.Count();
+                Log( countAdded );
+                Assert.Equal( countBefore+1, countAdded );
 
-            //         var blog = new Blog { Name = name };
-            //         db.Blogs.Add(blog);
-            //         db.SaveChanges();
-
-            //         // Display all Blogs from the database
-            //         var query = from b in db.Blogs
-            //                     orderby b.Name
-            //                     select b;
-
-            //         Console.WriteLine("All blogs in the database:");
-            //         foreach (var item in query)
-            //         {
-            //             Console.WriteLine(item.Name);
-            //         }
-
-            //         Console.WriteLine("Press any key to exit...");
-            //         Console.ReadKey();
-            //     }
-            // }
+                var query = from b in db.Books
+                            .OrderByDescending( b=>b.Id )
+                            .Take(1)
+                            select b;
+                
+                Log("db query created");
+                foreach( var item in query ) {
+                    Log( item );
+                }
+                var bookFromDb = query.FirstOrDefault();
+                Log( bookFromDb );
+                Assert.Equal( book, bookFromDb );
+                db.Remove( book );
+                db.SaveChanges();
+                var countAfter = db.Books.Count();
+                Log( countAfter );
+                Assert.Equal( countBefore, countAfter );
+            }
         }
+
     }
 }

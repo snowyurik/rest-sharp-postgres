@@ -3,51 +3,78 @@ using System.Collections.Generic;
 
 namespace Common {
 
-    public class EConfig : Exception {}
-    public class EConfigParamNotFound : EConfig {}
+    public class EConfig : Exception {
+        public EConfig():base() {}
+        public EConfig(string msg):base(msg) {}
+    }
+    public class EConfigParamNotFound : EConfig {
+        public EConfigParamNotFound():base(){}
+        public EConfigParamNotFound(string msg):base(msg){}
+    }
 
     /**
     base class for project configuration
     */
     public class Config {
 
-        private static Config instance = new Config();
-        private Dictionary<string,string> items = new Dictionary<string,string>();
+        private Dictionary<string,string> _items;
 
-        public static string get(string name) {
-            return instance._get(name);
+        public Config() {
+            reload();
         }
 
-        public static void set(string name, string value) {
-            instance._set(name, value);
+        /**
+        Override this method to create list of parameters with default values
+        defaults can be overriden with appsetings.json
+        result can be again overriden with environment variables
+        */
+        public virtual Dictionary<string,string> createParams() {
+            throw new EConfig("createParams should be overriden in child class");
+            return new Dictionary<string,string>();
         }
 
-        private string _get(string name){
-            try {
-                return items[name];
-            } catch( System.Collections.Generic.KeyNotFoundException ) {
-                throw new EConfigParamNotFound();
+        public string get(string name){
+            checkParamExist(name);
+            return _items[name];
+        }
+
+        public void set(string name, string value) {
+            checkParamExist(name);
+            _items[name] = value;
+        }
+
+        public void checkParamExist(string name) {
+            if( !_items.ContainsKey(name)) {
+                throw new EConfigParamNotFound("Invalid configuration parameter "+name+" , use/override Config.createParams() to specify list of parameters with default values");
             }
         }
 
-        private void _set(string name, string value) {
-            items[name] = value;
+
+        public void reload() {
+            _items = createParams(); 
+            loadConfigFile();
+            loadEnvironmentVariables();
         }
 
-        public static string prefix() {
-            return instance._prefix();
+        /**
+        load configuration from appsettings.json
+        */
+        public void loadConfigFile() { // TODO implement loading from appsettings.json
+            // not implemented
         }
 
-        public static void reload() {
-            instance._reload();
+        public void loadEnvironmentVariables() {
+            foreach( string key in _items.Keys ) {
+                string value = Environment.GetEnvironmentVariable( prefix()+"_"+ new String(key).ToUpper() );
+                if( String.IsNullOrEmpty(value) ) {
+                    continue;
+                }
+                _items[key] = value;
+            }
         }
 
-        private void _reload() {
-            instance._set( "testparam", Environment.GetEnvironmentVariable( _prefix()+"_"+ new String("testparam").ToUpper() ) );
-        }
-
-        private string _prefix() {
-            return "SMARTDEVAPP";
+        public virtual string prefix() {
+            return "SMARTDEVAPP"; // TODO magic
         }
     }
 }

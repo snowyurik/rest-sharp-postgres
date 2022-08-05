@@ -9,14 +9,19 @@ namespace Server.Test
 
         [Fact]
         public void testConfig() {
-            Assert.Throws<Common.EConfigParamNotFound>( ()=>Config.get("testparam") );
-            Config.set("testparam", "testvalue");
-            string param = Config.get("testparam");
+            Config config = new Config();
+            string evnName = config.prefix()+"_DBCONNECTION";
+            string evnValue = Environment.GetEnvironmentVariable(evnName); // preserve current param value
+            
+            Assert.Throws<Common.EConfigParamNotFound>( ()=>config.get("nonexistingParameter") );
+            config.set("dbconnection", "testvalue");
+            string param = config.get("dbconnection");
             Assert.Equal( "testvalue", param );
-            Environment.SetEnvironmentVariable(Config.prefix()+"_TESTPARAM", "testvalueFromEnv");
-            Assert.Equal( "testvalue", Config.get("testparam") );
-            Config.reload();
-            Assert.Equal( "testvalueFromEnv", Config.get("testparam") );
+            Environment.SetEnvironmentVariable(evnName, "testvalueFromEnv");
+            Assert.Equal( "testvalue", config.get("dbconnection") );
+            config.reload();
+            Assert.Equal( "testvalueFromEnv", config.get("dbconnection") );
+            Environment.SetEnvironmentVariable( evnName, evnValue );
         }
     }
 }

@@ -1,7 +1,9 @@
 # Changelog
 
 ## [2022-08-05]
- <!-- - CRUD for Books collection -->
+### Added
+ - Basic CRUD for Books collection
+ - Database migrations
  - Config with support of parameter override with environment variables
 
 ## [2022-08-03]
