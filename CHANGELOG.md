@@ -1,5 +1,9 @@
 # Changelog
 
+## [2022-08-05]
+ - CRUD for Books collection
+ - Config
+
 ## [2022-08-03]
 ### Added
  - Project created
@@ -7,3 +11,4 @@
  - Protocol definition (README)
  - General application architecture description(README)
  - gitignore
+
