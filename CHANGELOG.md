@@ -5,6 +5,7 @@
  - CRUD for Books collection via REST API
  - Final adjustments to README
  - Code cleanup
+ - Searh collection
 
 ## [2022-08-05]
 ### Added
