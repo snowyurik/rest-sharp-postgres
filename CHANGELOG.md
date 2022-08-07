@@ -1,5 +1,9 @@
 # Changelog
 
+## [2022-08-07]
+### Added
+ - CRUD for Books collection via REST API
+
 ## [2022-08-05]
 ### Added
  - Basic CRUD for Books collection
