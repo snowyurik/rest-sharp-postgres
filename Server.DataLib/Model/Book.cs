@@ -10,5 +10,6 @@ namespace Server.DataLib.Model {
     public class Book : BaseItem {
         public string Title { get; set; } = null!;
         public string Description { get; set; } = null!;
+        public bool Read { get; set; } = false;
     }
 }

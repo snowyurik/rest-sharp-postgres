@@ -28,7 +28,6 @@ namespace Server.Controllers {
         public IActionResult create( [FromRoute] string collection, [FromBody] Book book ) {
             try {
                 using (var db = new Context() ) {   
-                    // Book book = JsonConvert.DeserializeObject<Book>( item.ToString() );
                     db.Books.Add( book );
                     db.SaveChanges();
                     return new JsonResult( book );
@@ -42,19 +41,50 @@ namespace Server.Controllers {
             }
         }
 
+
         /**
         Get list of items
         */
+#nullable enable
         [HttpGet("{collection}")]
-        public IActionResult getList( string collection ) {
-             using (var db = new Context() ) {
-
-                var query = from b in db.Books
-                            .OrderByDescending( b=>b.Id )
-                            // .Take(IItem.DEFAULT_LIMIT)
-                            select b;
-                return new JsonResult( query.ToList<Book>() );
+        public IActionResult getList( string collection, [FromQuery] bool? read = null, [FromQuery] string? title = null ) {
+#nullable disable
+            try {
+                ( bool like, string partialTitle ) = isLike( title );
+                if(like) {
+                    partialTitle = partialTitle.Trim('"').Replace("\\\"","\"");
+                }
+                using (var db = new Context() ) {
+                    var query = from b in db.Books
+                                .OrderByDescending( b=>b.Id )
+                                .Where( b=> ( // TODO whis can be done better, but time is up 
+                                        ( read == null && title == null )
+                                        || ( title == null && b.Read == read )
+                                        || ( ( read == null || b.Read == read ) && ( 
+                                                ( !like && b.Title == title ) 
+                                                || ( like && b.Title.Contains(partialTitle)) 
+                                            ))
+                                    )) 
+                                select b;
+                    return new JsonResult( query.ToList<Book>() );
+                }
+            } catch( Exception e) {
+                return Problem(
+                    statusCode: 400,
+                    title: e.GetType().Name,
+                    detail: e.Message + " \n\n "+ e.StackTrace
+                );
             }
+        }
+
+#nullable enable
+        private (bool, string) isLike( string? needle ) {
+#nullable disable
+            if( needle == null ) {
+                return ( false, needle );
+            }
+            string[] exploded = needle.Split(":");
+            return ( exploded.FirstOrDefault() == "like", String.Join(":", exploded.Skip(1).ToArray()) );
         }
 
         [HttpGet("{collection}/{id}")]

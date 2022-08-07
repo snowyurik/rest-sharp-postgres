@@ -20,8 +20,11 @@
 All tests are based on xUnit
 
 ### Server.Integration.Test
-Will automatically build and run main app, then connect to it via localhost:5000 and perform api requests
-This tests are relatively slow, so not handy during development process, but nice for final check
+Will automatically build and run main app, then connect to it via localhost:5000 and perform api requests.
+
+This tests are relatively slow, so not handy during development process, but nice for final check.
+
+Do not run main app and integration tests on same machine simultaneously, that will cause a conflict.
 
 ### Server.Test
 Classic unit tests, fast (just CRUD in that sample project, though)
@@ -35,8 +38,27 @@ Classic unit tests, fast (just CRUD in that sample project, though)
 ```
 POST book - create new item
 GET book - read collection or collection item
-PUT books/{id} - update existing item
-DELETE books/{id} - remove existing item
+PUT book/{id} - update existing item
+DELETE book/{id} - remove existing item
+```
+
+### Mark book as read
+Can be done better (with many-to-one or many-to-many relations to collection of shelfs), but time is up. 
+```
+PUT book/{id} pass Book object as json like {
+                Id: id,
+                Title: "...",
+                Description: "...",
+                Read: true,
+            }
+```
+
+### Search
+```
+GET book/?read=true/false - get list of books which had been read
+GET book/?title=exact+match - get list of book with title "exact match"
+GET book/?title=like:"partial title" - get list of books where title contains string "partial title"
+GET book/?read=true&title=like:"partial title" - get list of books which had been read with title containing string "partial title"
 ```
 
 ## Database

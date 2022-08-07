@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Server.DataLib.Model;
+using Server.DataLib.Filter;
 using Common;
 using Newtonsoft.Json;
+using System.Reflection;
+using System.Linq;
+using System.Web;
 
 
 namespace Server.ClientLib {
@@ -18,8 +22,15 @@ namespace Server.ClientLib {
             T addedItem = JsonConvert.DeserializeObject<T>( result );
             return addedItem.Id;
         }
-        public List<T> getList<T>(int limit = IClient.DEFAULT_LIMIT, int offset = IClient.NO_OFFSET) where T : IItem {
-            string result = Http.get( getCollectionUrl<T>() );
+        public List<T> getList<T>(int limit = IClient.DEFAULT_LIMIT, int offset = IClient.NO_OFFSET, BookFilter filter = null ) where T : IItem {
+            string query = "";
+            if( filter != null ) {
+                IEnumerable<string> properties = from p in filter.GetType().GetProperties()
+                                where p.GetValue(filter, null) != null
+                                select p.Name + "=" + HttpUtility.UrlEncode(p.GetValue(filter, null).ToString());
+                query = "?"+String.Join("&", properties.ToArray());    
+            }
+            string result = Http.get( getCollectionUrl<T>() + query );
             return JsonConvert.DeserializeObject<List<T>>( result );
         }
         public T get<T>(int id) where T : BaseItem {

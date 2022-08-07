@@ -36,6 +36,11 @@ namespace Common {
                         throw new EHttp404Error( e.Message );
                     }
                 }
+                if( e.Response != null ) {
+                    string errorData = new StreamReader(e.Response.GetResponseStream())
+                            .ReadToEnd();
+                    throw new EHttp( "Http.post(): url:" + url+ " errorData:" + errorData );
+                }
                 throw new EHttp( e.Message );
             }
             return jsonStr;
