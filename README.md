@@ -1,6 +1,7 @@
 # RESTful webapi 2, net6
 
 ## Preparations
+ - Pull submodules `git submodule update --init --recursive`
  - Create empty PostgreSQL database 
  - Override default connection string using environment variable
  ``` export RSP_DBCONNECTION="Host=localhost;Database=rest-sharp-postgres;Username=rest-sharp-postgres;Password=rest-sharp-postgres"```
