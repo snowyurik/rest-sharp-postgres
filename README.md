@@ -3,9 +3,9 @@
 ## Preparations
  - Create empty PostgreSQL database 
  - Override default connection string using environment variable
- ` export RSP_DBCONNECTION="Host=localhost;Database=rest-sharp-postgres;Username=rest-sharp-postgres;Password=rest-sharp-postgres"`
+ ``` export RSP_DBCONNECTION="Host=localhost;Database=rest-sharp-postgres;Username=rest-sharp-postgres;Password=rest-sharp-postgres"```
  - Alternatively, run app/tests like this 
- `RSP_DBCONNECTION="Host=localhost;Database=rest-sharp-postgres;Username=rest-sharp-postgres;Password=rest-sharp-postgres" dotnet run/test`
+ ```RSP_DBCONNECTION="Host=localhost;Database=rest-sharp-postgres;Username=rest-sharp-postgres;Password=rest-sharp-postgres" dotnet run/test```
  - Alternatively, modify appsettings.jsons
 
 ## Project in solution
@@ -47,13 +47,11 @@ Entity Framework Core ORM, code-first. Database schema updated on startup.
 PostgreSQL
 
 ### Config
-```
 Defaults, which can be overriten with application.json, which can be overriten with costom config set as environment variable,
 and on top of that any parameter be overriten with it's own entironment variables.
-Because parameters like database password for production should not be part of the code
+Because parameters like database password for production should not be part of the code.
 
-Missing or invalid parameter have to case human readable error with instruction how to fix that
+Missing or invalid parameter have to cause human readable error with instruction how to fix that.
 
-Also, it's nice to have an ability to run multiple instances at once (see 12factor.net)
-```
+Also, it's nice to have an ability to run multiple instances at once (see 12factor.net).
 
