@@ -9,7 +9,7 @@
  ```RSP_DBCONNECTION="Host=localhost;Database=rest-sharp-postgres;Username=rest-sharp-postgres;Password=rest-sharp-postgres" dotnet run/test```
  - Alternatively, modify appsettings.jsons
 
-## Project in solution
+## Projects in solution
  - Server - main application
  - Server.Test - classic fast unit tests, used to be invoked all the time
  - Server.Integration.Test - slow tests which communicate with the server via http, used to be invoked once in a while
