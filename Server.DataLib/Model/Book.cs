@@ -9,5 +9,6 @@ namespace Server.DataLib.Model {
     [RestCollection]
     public class Book : BaseItem {
         public string Title { get; set; } = null!;
+        public string Description { get; set; } = null!;
     }
 }

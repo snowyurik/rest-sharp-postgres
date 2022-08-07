@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace Common {
 
@@ -13,7 +15,8 @@ namespace Common {
     }
 
     /**
-    base class for project configuration
+    Base class for project configuration
+    NOTE: yes, you can do it with standart cofiguration builder, but it does not punish developer/devops/sysop for missing parameter and that lead to a lot of problems on long run
     */
     public class Config {
 
@@ -30,7 +33,6 @@ namespace Common {
         */
         public virtual Dictionary<string,string> createParams() {
             throw new EConfig("createParams should be overriden in child class");
-            return new Dictionary<string,string>();
         }
 
         public string get(string name){
@@ -59,8 +61,16 @@ namespace Common {
         /**
         load configuration from appsettings.json
         */
-        public void loadConfigFile() { // TODO implement loading from appsettings.json
-            // not implemented
+        public void loadConfigFile() { 
+            IConfiguration cnf = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+                .Build();
+            foreach( string key in _items.Keys )  {
+                if( String.IsNullOrEmpty( cnf[key]) ) {
+                    continue;
+                }
+                _items[key] = cnf[key];
+            }
         }
 
         public void loadEnvironmentVariables() {
@@ -74,7 +84,7 @@ namespace Common {
         }
 
         public virtual string prefix() {
-            return "SMARTDEVAPP"; // TODO magic
+            return "RSP"; // TODO magic
         }
     }
 }

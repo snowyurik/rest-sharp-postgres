@@ -1,10 +1,8 @@
 using System;
-// using Microsoft.AspNetCore.Mvc;
-// using Microsoft.Extensions.Logging;
-// using MitmMockService.Models;
 using System.Net;
 using System.IO;
 using System.Text;
+using Newtonsoft.Json;
 
 
 namespace Common {
@@ -61,8 +59,12 @@ namespace Common {
                     jsonStr = reader.ReadToEnd();
                 }
                 response.Close();
+            } catch (WebException e) {
+                string errorData = new StreamReader(e.Response.GetResponseStream())
+                          .ReadToEnd();
+                throw new EHttp( "Http.post(): url:" + url+ " json: "+ json+" errorData:" + errorData );
             } catch (Exception e) {
-                throw new EHttp( "Http.post(): url:" + url+ " json: "+ json+" error:" + e.Message );
+                throw new EHttp( "Http.post(): url:" + url+ " json: "+ json+" error:" + JsonConvert.SerializeObject(e) );
             }
             return jsonStr;
         }
@@ -96,12 +98,6 @@ namespace Common {
             try {
                 WebRequest request = WebRequest.Create(url);
                 request.Method = "DELETE";
-                // byte[] byteArray = Encoding.UTF8.GetBytes(json);
-                // request.ContentType = "application/json";
-                // request.ContentLength = byteArray.Length;
-                // Stream dataStream = request.GetRequestStream();
-                // dataStream.Write(byteArray, 0, byteArray.Length);
-                // dataStream.Close();
                 WebResponse response = request.GetResponse();
                 using (Stream dataStream = response.GetResponseStream())
                 {

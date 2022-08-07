@@ -25,12 +25,20 @@ namespace Server.Controllers {
         Post is RESTfult Create
         */
         [HttpPost("{collection}")]
-        public JsonResult create( [FromRoute] string collection, [FromBody] Book book ) {
-            using (var db = new Context() ) {   
-                // Book book = JsonConvert.DeserializeObject<Book>( item.ToString() );
-                db.Books.Add( book );
-                db.SaveChanges();
-                return new JsonResult( book );
+        public IActionResult create( [FromRoute] string collection, [FromBody] Book book ) {
+            try {
+                using (var db = new Context() ) {   
+                    // Book book = JsonConvert.DeserializeObject<Book>( item.ToString() );
+                    db.Books.Add( book );
+                    db.SaveChanges();
+                    return new JsonResult( book );
+                }
+            } catch( Exception e) {
+                return Problem(
+                    statusCode: 400,
+                    title: e.GetType().Name,
+                    detail: e.Message
+                );
             }
         }
 
@@ -38,8 +46,9 @@ namespace Server.Controllers {
         Get list of items
         */
         [HttpGet("{collection}")]
-        public JsonResult getList( string collection ) {
+        public IActionResult getList( string collection ) {
              using (var db = new Context() ) {
+
                 var query = from b in db.Books
                             .OrderByDescending( b=>b.Id )
                             // .Take(IItem.DEFAULT_LIMIT)
@@ -64,7 +73,7 @@ namespace Server.Controllers {
         }
 
         [HttpPut("{collection}/{id}")]
-        public JsonResult update([FromRoute] string collection, [FromBody] Book book) {
+        public IActionResult update([FromRoute] string collection, [FromBody] Book book) {
             using (var db = new Context() ) {
                 db.Update( book );
                 db.SaveChanges();
@@ -73,7 +82,7 @@ namespace Server.Controllers {
         }
 
         [HttpDelete("{collection}/{id}")]
-        public JsonResult delete([FromRoute] string collection, [FromRoute] int id ) {
+        public IActionResult delete([FromRoute] string collection, [FromRoute] int id ) {
             using (var db = new Context() ) {
                 var query = from b in db.Books
                     .Where( b=>b.Id == id)

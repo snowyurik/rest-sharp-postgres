@@ -10,7 +10,7 @@ namespace Server.DataLib.Model {
         [Key]
         public int Id { get; set; } // all Items have Id as key
 
-        public override string ToString() {
+        public string ToJsonString() {
             return JsonConvert.SerializeObject( this );
         }
     }

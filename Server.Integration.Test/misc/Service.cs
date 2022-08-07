@@ -1,9 +1,5 @@
 using System;
-// using System.Type;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using Newtonsoft.Json;
 using System.IO;
 using Common;
 
@@ -39,19 +35,18 @@ namespace Server.Integration.Test {
                 return true;
             } catch(EHttp404Error){
                 return true; // service is up anyway
-            } catch( EHttp e ) {
-                Console.WriteLine( "Service.checkalive: "+e.Message );
+            } catch( EHttp ) {
+                // Console.WriteLine( "Service.checkalive: "+e.Message );
             }
             return false;
         }
 
         public void start() {
 
-            Console.WriteLine("================ starting ServerAPITelegram  ============");
+            Console.WriteLine("================ starting "+getProjectName()+"  ============");
             if( process == null ) {
                 process = new Process();
             }
-            // Process process = new Process();
             // string runcmd = "run --no-build --project "
             string runcmd = "run --project "
                 +Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(
@@ -67,15 +62,14 @@ namespace Server.Integration.Test {
             process.Start();
             int maxreads = 100;
             while( !checkalive() && maxreads > 0) {
-                Console.WriteLine("Assuming build not finished, wait and retry ..");
+                Console.WriteLine("No responce yet, assuming build not finished, wait and retry ..");
                 System.Threading.Thread.Sleep(1000);
                 maxreads--;
             }
-            Console.WriteLine("================ ServerAPITelegram started ============");
+            Console.WriteLine("================ "+getProjectName()+" started ============");
         }
 
         public void stop() {
-            // try {
             try {
                 Console.WriteLine("================ Stopping Service ====================");
                 // process.Close();
@@ -88,7 +82,6 @@ namespace Server.Integration.Test {
                     maxreads--;
                 }
             } catch(System.NullReferenceException) {}
-            // } catch(System.InvalidOperationException) {}
         }
 
 

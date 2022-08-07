@@ -19,7 +19,7 @@ namespace Server.Misc {
         */
         public override Dictionary<string,string> createParams() {
             return new Dictionary<string,string> {
-                ["dbconnection"] = "Host=localhost;Database=rest-sharp-postgres;Username=rest-sharp-postgres;Password=rest-sharp-postgres"
+                ["dbconnection"] = "Host=localhost;Database=rest-sharp-postgres;Username=rest-sharp-postgres;Password=rest-sharp-postgresBRAEKME"
             };
         }
 
