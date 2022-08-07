@@ -1,6 +1,7 @@
 using System;
 using Xunit;
 using Server.Model;
+using Server.DataLib.Model;
 using Server.Misc;
 using System.Linq;
 // using ContosoUniversity.Data;
@@ -42,7 +43,7 @@ namespace Server.Test
                 foreach( var item in query ) {
                     Log( item );
                 }
-                var bookFromDb = query.FirstOrDefault();
+                Book bookFromDb = query.FirstOrDefault();
                 Log( bookFromDb );
                 Assert.Equal( book, bookFromDb );
                 db.Remove( book );

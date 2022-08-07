@@ -5,12 +5,13 @@
 
 # Protocol (lets use documentation first approach here)
 ```
-books
-books?startIndex=0size=20 <- we should be able to limit results on collection
-books?title=like:boo <- RHS Colon, [title] LIKE %boo%, if we need ":" symbol, we need to use "\:" or like:"title:with:colon"
-books?title=book <- title exactly equal
-books?authorId=in:[1,2,3] <- select multiple
-books/{id}
+/ <- used to check if service is alive
+/books <- list of books sorting by default, default limit 1000
+/books?startIndex=0size=20 <- we should be able to limit results on collection
+/books?title=like:boo <- RHS Colon, [title] LIKE %boo%, if we need ":" symbol, we need to use "\:" or like:"title:with:colon"
+/books?title=book <- title exactly equal
+/books?authorId=in:[1,2,3] <- select multiple
+/books/{id}
 
 I will always map complicated queries into view or stored routine or temporary table, so there wont be any nested results
 Filter will apply to resulting 'flat' table.

@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\EFCore.NamingConventions\EFCore.NamingConventions\EFCore.NamingConventions.csproj" />
+    <ProjectReference Include="..\Server.DataLib\Server.DataLib.csproj" />
   </ItemGroup>
 
 </Project>
