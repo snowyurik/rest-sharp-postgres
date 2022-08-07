@@ -3,6 +3,8 @@
 ## [2022-08-07]
 ### Added
  - CRUD for Books collection via REST API
+ - Final adjustments to README
+ - Code cleanup
 
 ## [2022-08-05]
 ### Added
