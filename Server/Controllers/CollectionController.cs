@@ -10,6 +10,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Server.DataLib.Attributes;
 using System.Reflection;
+using Microsoft.EntityFrameworkCore;
+using JsonElement = System.Text.Json.JsonElement;
+// using System.Text.Json;
 
 namespace Server.Controllers {
 
@@ -21,17 +24,21 @@ namespace Server.Controllers {
     [Route("/")]
     public class CollectionController : ControllerBase {
 
-        /**
-        Post is RESTfult Create
-        */
-        [HttpPost("{collection}")]
-        public IActionResult create( [FromRoute] string collection, [FromBody] Book book ) {
+        private Context _context = new Context();
+        private Dictionary<string, IRepository> _repoMap = new Dictionary<string, IRepository> { // TODO replace with Attributes and reflection
+            { "book", new Repository<Book>() }
+        };
+        public Context getContext() {
+            return _context;
+        }
+
+        public IRepository getRepository(string collection) {
+            return _repoMap[collection];
+        }
+
+        private IActionResult _callWrapper(Func<IActionResult> callback) {
             try {
-                using (var db = new Context() ) {   
-                    db.Books.Add( book );
-                    db.SaveChanges();
-                    return new JsonResult( book );
-                }
+                return callback();
             } catch( Exception e) {
                 return Problem(
                     statusCode: 400,
@@ -39,6 +46,29 @@ namespace Server.Controllers {
                     detail: e.Message
                 );
             }
+        }
+
+        /**
+        Post is RESTfult Create
+        */
+        [HttpPost("{collection}")]
+        public IActionResult create( [FromRoute] string collection, [FromBody] JsonElement item ) {
+            return _callWrapper( ()=>{ return getRepository(collection).create( item ); });
+        }
+
+        [HttpGet("{collection}/{id}")]
+        public IActionResult get( string collection, int id ) {
+            return _callWrapper( ()=>{ return getRepository(collection).get( id ); });
+        }
+
+        [HttpPut("{collection}/{id}")]
+        public IActionResult update([FromRoute] string collection, [FromBody] JsonElement item) {
+            return _callWrapper( ()=>{ return getRepository(collection).update(item); });
+        }
+
+        [HttpDelete("{collection}/{id}")]
+        public IActionResult delete([FromRoute] string collection, [FromRoute] int id ) {
+            return _callWrapper( ()=>{ return getRepository(collection).delete( id ); });
         }
 
 
@@ -54,7 +84,7 @@ namespace Server.Controllers {
                 if(like) {
                     partialTitle = partialTitle.Trim('"').Replace("\\\"","\"");
                 }
-                using (var db = new Context() ) {
+                using (var db = _context ) {
                     var query = from b in db.Books
                                 .OrderByDescending( b=>b.Id )
                                 .Where( b=> ( // TODO whis can be done better, but time is up 
@@ -86,45 +116,6 @@ namespace Server.Controllers {
             string[] exploded = needle.Split(":");
             return ( exploded.FirstOrDefault() == "like", String.Join(":", exploded.Skip(1).ToArray()) );
         }
-
-        [HttpGet("{collection}/{id}")]
-        public IActionResult get( string collection, int id ) {
-            using( var db = new Context() ) {
-                var query = from b in db.Books
-                    .Where( b=>b.Id == id)
-                    .Take(1)
-                    select b;
-                if( query.Count<Book>() != 1) {
-                    return NotFound();
-                }
-                Book book = query.First<Book>();
-                return new JsonResult( book );
-            }
-        }
-
-        [HttpPut("{collection}/{id}")]
-        public IActionResult update([FromRoute] string collection, [FromBody] Book book) {
-            using (var db = new Context() ) {
-                db.Update( book );
-                db.SaveChanges();
-                return new JsonResult( book );
-            }
-        }
-
-        [HttpDelete("{collection}/{id}")]
-        public IActionResult delete([FromRoute] string collection, [FromRoute] int id ) {
-            using (var db = new Context() ) {
-                var query = from b in db.Books
-                    .Where( b=>b.Id == id)
-                    .Take(1)
-                    select b;
-                Book book = query.FirstOrDefault<Book>();
-                db.Remove( book );
-                db.SaveChanges();
-                return new JsonResult( null );
-            }
-        }
-
           
     }
 }

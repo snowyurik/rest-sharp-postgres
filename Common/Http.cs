@@ -62,6 +62,7 @@ namespace Common {
                 {
                     StreamReader reader = new StreamReader(dataStream);
                     jsonStr = reader.ReadToEnd();
+                    Console.WriteLine( jsonStr );
                 }
                 response.Close();
             } catch (WebException e) {

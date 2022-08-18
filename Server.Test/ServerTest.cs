@@ -10,6 +10,7 @@ using Npgsql;
 
 namespace Server.Test
 {
+    [Collection("Sequential")]
     public class ServerTest : Common.Test
     {
         [Fact]

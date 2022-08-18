@@ -8,6 +8,7 @@ namespace Server.Model {
     public class Context : DbContext {
 
         public DbSet<Book> Books { get; set; }
+        public DbSet<Shelf> Shelfs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder builder) {
             builder

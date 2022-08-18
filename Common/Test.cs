@@ -13,7 +13,10 @@ namespace Common {
         }
 
         protected void Log( object obj ) {
-            Log( JsonConvert.SerializeObject( obj, Formatting.Indented ), (new System.Diagnostics.StackTrace())!.GetFrame(1)!.GetMethod()!.Name );
+            if( obj == null ) {
+                Log("NULL");
+            }
+            Log( obj.GetType().ToString() + ": " + JsonConvert.SerializeObject( obj, Formatting.Indented ), (new System.Diagnostics.StackTrace())!.GetFrame(1)!.GetMethod()!.Name );
         }
 
     }
