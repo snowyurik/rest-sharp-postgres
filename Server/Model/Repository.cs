@@ -5,6 +5,11 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Text.Json;
+using System.Reflection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Dynamic.Core;
 
 
 namespace Server.Model {
@@ -14,6 +19,7 @@ namespace Server.Model {
         public abstract IActionResult get(int id);
         public abstract IActionResult update(JsonElement json);
         public abstract IActionResult delete(int id);
+        public abstract IActionResult getList(Microsoft.AspNetCore.Http.IQueryCollection query);
     }
     /**
     wrapper for DbSet<...>
@@ -56,6 +62,47 @@ namespace Server.Model {
             _context.Remove( item );
             _context.SaveChanges();
             return new JsonResult( null );
+        }
+
+        public IActionResult getList(Microsoft.AspNetCore.Http.IQueryCollection query) {
+            List<FormattableString> clauses = new List<FormattableString>();
+            clauses.Add($" true ");
+            PropertyInfo[] ps = typeof(T).GetProperties();
+            foreach( PropertyInfo p in ps) {
+                string key = p.Name.ToLower();
+                string value = query[key];
+                if( String.IsNullOrEmpty(value) ) {
+                    continue;
+                }
+
+                if( p.PropertyType == typeof(bool) ) {
+                    bool boolValue = Boolean.Parse( value );
+                    clauses.Add($"{key} = {boolValue}");
+                }
+                if( p.PropertyType == typeof(string)) {
+                    ( bool like, string partialValue ) = isLike( value );
+                    if( like ) {
+                        clauses.Add($" title.Contains({partialValue})");
+                    }
+                    if( !like){
+                        clauses.Add($" title = \"{value}\" ");
+                    }
+                }
+            }
+            IOrderedQueryable<T> sql = _context.Set<T>()
+                        .Where(String.Join(" AND ", clauses))
+                        .OrderBy("id DESC");
+            return new JsonResult( sql.ToList<T>() );
+        }
+
+#nullable enable
+        private (bool, string) isLike( string? needle ) {
+#nullable disable
+            if( needle == null ) {
+                return ( false, needle );
+            }
+            string[] exploded = needle.Split(":");
+            return ( exploded.FirstOrDefault() == "like", String.Join(":", exploded.Skip(1).ToArray()) );
         }
 
     }

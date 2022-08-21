@@ -12,6 +12,8 @@ using Server.DataLib.Attributes;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using JsonElement = System.Text.Json.JsonElement;
+using System.Linq.Dynamic.Core;
+
 // using System.Text.Json;
 
 namespace Server.Controllers {
@@ -20,14 +22,33 @@ namespace Server.Controllers {
         public EItemNotFound(string msg) : base(msg) {}
     }
 
+    /**
+    this controller provide universal rest api for all data models defined in Server.DataLib.Model 
+    which are based on Server.DataLib.Model.BaseItem class
+    to add new table - just add new data class there, add it to Server.Model.Context and run
+        dotnet ef migrations add %migration name%
+    */
     [ApiController]
     [Route("/")]
     public class CollectionController : ControllerBase {
 
         private Context _context = new Context();
-        private Dictionary<string, IRepository> _repoMap = new Dictionary<string, IRepository> { // TODO replace with Attributes and reflection
-            { "book", new Repository<Book>() }
-        };
+        private Dictionary<string, IRepository> _repoMap;
+
+        /**
+        adding all classes deritaed from BaseItem which we have in Server.DataLib assembly
+        */
+        public CollectionController() {
+            _repoMap = new Dictionary<string, IRepository>();
+            var types = Assembly.GetAssembly( typeof(BaseItem) ).GetTypes()
+                .Where( t => t.BaseType == typeof(BaseItem));
+            foreach( Type itemType in types ) {
+                Type repoType = typeof( Repository<> );
+                Type genericType = repoType.MakeGenericType(itemType);
+                _repoMap.Add( itemType.Name.ToLower(), (IRepository)Activator.CreateInstance( genericType ) );
+            }
+        }
+
         public Context getContext() {
             return _context;
         }
@@ -71,51 +92,11 @@ namespace Server.Controllers {
             return _callWrapper( ()=>{ return getRepository(collection).delete( id ); });
         }
 
-
-        /**
-        Get list of items
-        */
-#nullable enable
         [HttpGet("{collection}")]
-        public IActionResult getList( string collection, [FromQuery] bool? read = null, [FromQuery] string? title = null ) {
-#nullable disable
-            try {
-                ( bool like, string partialTitle ) = isLike( title );
-                if(like) {
-                    partialTitle = partialTitle.Trim('"').Replace("\\\"","\"");
-                }
-                using (var db = _context ) {
-                    var query = from b in db.Books
-                                .OrderByDescending( b=>b.Id )
-                                .Where( b=> ( // TODO whis can be done better, but time is up 
-                                        ( read == null && title == null )
-                                        || ( title == null && b.Read == read )
-                                        || ( ( read == null || b.Read == read ) && ( 
-                                                ( !like && b.Title == title ) 
-                                                || ( like && b.Title.Contains(partialTitle)) 
-                                            ))
-                                    )) 
-                                select b;
-                    return new JsonResult( query.ToList<Book>() );
-                }
-            } catch( Exception e) {
-                return Problem(
-                    statusCode: 400,
-                    title: e.GetType().Name,
-                    detail: e.Message + " \n\n "+ e.StackTrace
-                );
-            }
+        public IActionResult getList( string collection ) {
+            return _callWrapper( ()=>{ return getRepository(collection).getList( this.Request.Query ); });
         }
 
-#nullable enable
-        private (bool, string) isLike( string? needle ) {
-#nullable disable
-            if( needle == null ) {
-                return ( false, needle );
-            }
-            string[] exploded = needle.Split(":");
-            return ( exploded.FirstOrDefault() == "like", String.Join(":", exploded.Skip(1).ToArray()) );
-        }
           
     }
 }

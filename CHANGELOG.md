@@ -1,5 +1,10 @@
 # Changelog
 
+## [2022-08-21]
+### Added
+ - Universal filter for any collection, based or class properties (only bool and string types are suppoeted for now, but can be extended)
+ - All data classes based on Sever.Model.BaseItem automatically used as collection classes
+
 ## [2022-08-18]
 ### Added
  - Universal solution for CRUD for any collection
